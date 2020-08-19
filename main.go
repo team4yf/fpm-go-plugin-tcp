@@ -18,6 +18,16 @@ func main() {
 		//data 通常是 byte[] 类型，可以转成 string 或者 map
 
 		app.Logger.Debugf("data: %+v", data)
+		payload := data.(map[string]interface{})
+		clientID := payload["clientID"].(string)
+		app.Execute("socket.setID", &fpm.BizParam{
+			"clientID": clientID,
+			"id":       "abc",
+		})
+		app.Execute("socket.send", &fpm.BizParam{
+			"clientID": "abc",
+			"data":     []byte{97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97},
+		})
 	})
 	// app.Execute("mqttclient.publish", &fpm.BizParam{
 	// 	"topic":   "$s2d/111/ipc/demo/feedback",

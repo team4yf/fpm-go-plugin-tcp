@@ -17,6 +17,8 @@
         "log_backup_count": 7
     },
     "socket": {
-        "port": 5002
+        "port": 5002,
+        "max": 1024,
+        "perfix": ["6162","6163"]
     }
 }
