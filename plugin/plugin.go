@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -29,10 +30,15 @@ type Options struct {
 	Max    int
 	Perfix []string
 }
+
+type connInstance struct {
+	conn *net.Conn
+	id   string
+}
 type netReceiver struct {
 	options *Options
 	handler ReceiveHandler
-	clients map[string]net.Conn
+	clients map[string]*connInstance
 	ids     map[string]string
 }
 
@@ -52,7 +58,10 @@ func (r *netReceiver) Listen() {
 			// accept connection on port
 			conn, _ := ln.Accept()
 			clientID := utils.GenShortID()
-			r.clients[clientID] = conn
+			r.clients[clientID] = &connInstance{
+				conn: &conn,
+				id:   clientID,
+			}
 			go func() {
 				for {
 					buf := make([]byte, max)
@@ -60,7 +69,11 @@ func (r *netReceiver) Listen() {
 					if err != nil {
 						if err.Error() == "EOF" {
 							// client closed
+							// remove the client
 							conn.Close()
+							connInstance := r.clients[clientID]
+							delete(r.ids, connInstance.id)
+							delete(r.clients, clientID)
 							break
 						}
 						fmt.Println("Error to read message because of ", err)
@@ -106,17 +119,16 @@ func (r *netReceiver) Write(id string, buf []byte) error {
 	if !ok {
 		return errors.New("clientID/id: " + clientID + " not exists")
 	}
-	_, err := conn.Write(buf)
+	_, err := (*(conn.conn)).Write(buf)
 	return err
 }
 
 func (r *netReceiver) SetID(id, connID string) (bool, error) {
-	if _, ok := r.ids[id]; ok {
-		return false, errors.New("id exists")
-	}
-	if _, ok := r.clients[connID]; !ok {
+	instance, ok := r.clients[connID]
+	if !ok {
 		return false, errors.New("conn id not exists")
 	}
+	instance.id = id
 	r.ids[id] = connID
 	return true, nil
 }
@@ -126,7 +138,7 @@ func NewNetReceiver(options *Options, f ReceiveHandler) NetReceiver {
 	return &netReceiver{
 		options: options,
 		handler: f,
-		clients: make(map[string]net.Conn),
+		clients: make(map[string]*connInstance),
 		ids:     make(map[string]string),
 	}
 }
@@ -161,7 +173,14 @@ func init() {
 		bizModule["send"] = func(param *fpm.BizParam) (data interface{}, err error) {
 			clientID := (*param)["clientID"].(string)
 			// TODO: get type of the data, it can be string / []byte
-			buf := (*param)["data"].([]byte)
+			bufData := (*param)["data"]
+			var buf []byte
+			switch bufData.(type) {
+			case string:
+				buf, err = hex.DecodeString(bufData.(string))
+			case []byte:
+				buf = bufData.([]byte)
+			}
 			err = server.Write(clientID, buf)
 			data = 1
 			return

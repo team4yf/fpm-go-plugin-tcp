@@ -1,4 +1,4 @@
-@host = http://localhost:9999
+@host = http://localhost:9090
 
 ### test api
 POST {{host}}/api
@@ -10,5 +10,18 @@ Content-Type: application/json
     "timestamp": 123,
     "v":"1.0",
     "param":{},
+    "sign":"abc"
+}
+
+### test send
+POST {{host}}/api
+Content-Type: application/json
+
+{
+    "method": "socket.send",
+    "appkey": "abc",
+    "timestamp": 123,
+    "v":"1.0",
+    "param":{"clientID":"abc", "data": "6162636465666768696a6b"},
     "sign":"abc"
 }

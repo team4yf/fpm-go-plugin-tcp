@@ -34,6 +34,6 @@ func main() {
 	// 	"payload": ([]byte)(`{"test":1}`),
 	// })
 
-	app.Run(":9999")
+	app.Run()
 
 }
