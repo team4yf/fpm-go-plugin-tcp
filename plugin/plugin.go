@@ -58,11 +58,16 @@ func (r *netReceiver) Listen() {
 					buf := make([]byte, max)
 					reqLen, err := conn.Read(buf)
 					if err != nil {
+						if err.Error() == "EOF" {
+							// client closed
+							conn.Close()
+							break
+						}
 						fmt.Println("Error to read message because of ", err)
 						continue
 					}
 					if reqLen < 10 {
-						fmt.Println("too short")
+						// fmt.Println("too short")
 						continue
 					}
 					data := buf[0:reqLen]
@@ -75,7 +80,7 @@ func (r *netReceiver) Listen() {
 						}
 					}
 					if !matched {
-						fmt.Printf("perfix: %s \t not matched\n", perfix)
+						// fmt.Printf("perfix: %s \t not matched\n", perfix)
 						continue
 					}
 					// output message received
@@ -171,6 +176,7 @@ func init() {
 			data, err = server.SetID(id, clientID)
 			return
 		}
+
 		app.AddBizModule("socket", &bizModule)
 
 		server.Listen()
