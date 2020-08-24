@@ -10,7 +10,7 @@ https://shimo.im/docs/YhvpcDkCkPxgqrY9/ 《精讯云上传协议2.0+(2)》，可
 
 ```golang
 // subscribe the event
-app.Subscribe("#tcp/receive/6162", func(topic string, data interface{}) {
+app.Subscribe("#tcp/receive", func(topic string, data interface{}) {
     //data 通常是 byte[] 类型，可以转成 string 或者 map
 
     app.Logger.Debugf("data: %+v", data)

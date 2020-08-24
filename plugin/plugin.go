@@ -166,10 +166,11 @@ func init() {
 
 		app.Logger.Debugf("Socket Config port: %+v", options)
 
-		server := NewNetReceiver(&options, app, func(clientID string, perfix string, data []byte) {
+		server := NewNetReceiver(&options, app, func(clientID string, prefix string, data []byte) {
 			// publish here
 
-			app.Publish("#tcp/receive/"+perfix, map[string]interface{}{
+			app.Publish("#tcp/receive", map[string]interface{}{
+				"prefix":   prefix,
 				"clientID": clientID,
 				"data":     data,
 			})

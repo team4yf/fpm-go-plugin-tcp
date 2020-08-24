@@ -14,7 +14,7 @@ func main() {
 	// 	"topics": "$s2d/+/ipc/demo/execute",
 	// })
 
-	app.Subscribe("#tcp/receive/6162", func(topic string, data interface{}) {
+	app.Subscribe("#tcp/receive", func(topic string, data interface{}) {
 		//data 通常是 byte[] 类型，可以转成 string 或者 map
 
 		app.Logger.Debugf("data: %+v", data)
