@@ -29,6 +29,10 @@ func main() {
 			"data":     []byte{97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97},
 		})
 	})
+	app.Subscribe("#tcp/disconnect", func(_ string, data interface{}) {
+		// data: { "id": "abc", "clientID": "bcd" }
+		app.Logger.Debugf("data: %+v", data)
+	})
 	// app.Execute("mqttclient.publish", &fpm.BizParam{
 	// 	"topic":   "$s2d/111/ipc/demo/feedback",
 	// 	"payload": ([]byte)(`{"test":1}`),

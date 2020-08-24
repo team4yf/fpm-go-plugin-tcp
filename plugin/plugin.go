@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/team4yf/yf-fpm-server-go/fpm"
 	"github.com/team4yf/yf-fpm-server-go/pkg/utils"
@@ -26,9 +25,9 @@ type NetReceiver interface {
 }
 
 type Options struct {
-	Port   int
-	Max    int
-	Perfix []string
+	Port   int      `json:"port"`
+	Max    int      `json:"max"`
+	Prefix []string `json:"prefix"`
 }
 
 type connInstance struct {
@@ -36,6 +35,7 @@ type connInstance struct {
 	id   string
 }
 type netReceiver struct {
+	app     *fpm.Fpm
 	options *Options
 	handler ReceiveHandler
 	clients map[string]*connInstance
@@ -48,7 +48,7 @@ type netReceiver struct {
 func (r *netReceiver) Listen() {
 	port := r.options.Port
 	max := r.options.Max
-	perfixArr := r.options.Perfix
+	prefixArr := r.options.Prefix
 	go func() {
 		// listen on all interfaces
 		ln, _ := net.Listen("tcp", fmt.Sprintf(":%d", port))
@@ -74,9 +74,13 @@ func (r *netReceiver) Listen() {
 							connInstance := r.clients[clientID]
 							delete(r.ids, connInstance.id)
 							delete(r.clients, clientID)
+							r.app.Publish("#tcp/disconnect", map[string]interface{}{
+								"id":       connInstance.id,
+								"clientID": clientID,
+							})
 							break
 						}
-						fmt.Println("Error to read message because of ", err)
+						r.app.Logger.Errorf("Error to read message because of: %v ", err)
 						continue
 					}
 					if reqLen < 10 {
@@ -86,7 +90,7 @@ func (r *netReceiver) Listen() {
 					data := buf[0:reqLen]
 					perfix := fmt.Sprintf("%x", buf[0:2])
 					matched := false
-					for _, p := range perfixArr {
+					for _, p := range prefixArr {
 						matched = p == perfix
 						if matched {
 							break
@@ -134,10 +138,11 @@ func (r *netReceiver) SetID(id, connID string) (bool, error) {
 }
 
 //NewNetReceiver create a new receiver
-func NewNetReceiver(options *Options, f ReceiveHandler) NetReceiver {
+func NewNetReceiver(options *Options, app *fpm.Fpm, f ReceiveHandler) NetReceiver {
 	return &netReceiver{
 		options: options,
 		handler: f,
+		app:     app,
 		clients: make(map[string]*connInstance),
 		ids:     make(map[string]string),
 	}
@@ -146,26 +151,29 @@ func NewNetReceiver(options *Options, f ReceiveHandler) NetReceiver {
 func init() {
 	fpm.Register(func(app *fpm.Fpm) {
 		// 配置 socket
-		if !app.HasConfig("socket") {
-			panic("socket config node required")
+
+		options := Options{
+			Port:   5001,
+			Max:    128,
+			Prefix: []string{"6160"},
 		}
-		socketConfig := app.GetConfig("socket").(map[string]interface{})
-		options := &Options{
-			Port:   int(socketConfig["port"].(float64)),
-			Max:    int(socketConfig["max"].(float64)),
-			Perfix: strings.Split(socketConfig["perfix"].(string), ","),
+		if app.HasConfig("socket") {
+			if err := app.FetchConfig("socket", &options); err != nil {
+				app.Logger.Errorf("Load Socket Config Error: %v", err)
+				return
+			}
 		}
 
-		app.Logger.Debugf("Socket Config port: %+v", *options)
+		app.Logger.Debugf("Socket Config port: %+v", options)
 
-		server := NewNetReceiver(options, func(clientID string, perfix string, data []byte) {
+		server := NewNetReceiver(&options, app, func(clientID string, perfix string, data []byte) {
 			// publish here
 
 			app.Publish("#tcp/receive/"+perfix, map[string]interface{}{
 				"clientID": clientID,
 				"data":     data,
 			})
-			app.Logger.Infof("tcp receive: %s, %v", clientID, data)
+			// app.Logger.Infof("tcp receive: %s, %v", clientID, data)
 		})
 
 		bizModule := make(fpm.BizModule, 0)

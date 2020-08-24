@@ -25,4 +25,9 @@ app.Subscribe("#tcp/receive/6162", func(topic string, data interface{}) {
         "data":     []byte{97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97},
     })
 })
+
+app.Subscribe("#tcp/disconnect", func(_ string, data interface{} ) {
+    // data: { "id": "abc", "clientID": "bcd" }
+    app.Logger.Debugf("data: %+v", data)
+})
 ```
