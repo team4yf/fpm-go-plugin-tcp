@@ -1,5 +1,16 @@
 ## fpm-go-plugin-tcp
 
+#### Config
+
+```json
+{
+    "socket": {
+        "port": 5002,
+        "prefix": ["6162","6163"]
+    }
+}
+```
+
 ```sh
 echo -n -e "\x61\x62\x31\x38\x03\x34\x43\x0d\x0a\x0a\x0a\x0a\x0a\x0a\x0a\x0a\x0a" | nc localhost 5002
 ```

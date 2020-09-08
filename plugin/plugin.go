@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/team4yf/fpm-go-pkg/utils"
 	"github.com/team4yf/yf-fpm-server-go/fpm"
-	"github.com/team4yf/yf-fpm-server-go/pkg/utils"
 )
 
 //ReceiveHandler the receive handler
