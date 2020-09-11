@@ -17,8 +17,8 @@ func main() {
 	app.Subscribe("#tcp/receive", func(topic string, data interface{}) {
 		//data 通常是 byte[] 类型，可以转成 string 或者 map
 
-		app.Logger.Debugf("data: %+v", data)
 		payload := data.(map[string]interface{})
+		app.Logger.Debugf("data: %x", payload["data"])
 		clientID := payload["clientID"].(string)
 		app.Execute("socket.setID", &fpm.BizParam{
 			"clientID": clientID,

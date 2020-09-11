@@ -83,7 +83,7 @@ func (r *netReceiver) Listen() {
 						r.app.Logger.Errorf("Error to read message because of: %v ", err)
 						continue
 					}
-					if reqLen < 10 {
+					if reqLen < 2 {
 						// fmt.Println("too short")
 						continue
 					}

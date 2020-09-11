@@ -3,17 +3,11 @@ module github.com/team4yf/fpm-go-plugin-tcp
 go 1.14
 
 require (
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/mitchellh/mapstructure v1.3.3 // indirect
-	github.com/pelletier/go-toml v1.8.0 // indirect
-	github.com/spf13/afero v1.3.4 // indirect
-	github.com/spf13/cast v1.3.1 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
+	github.com/spf13/afero v1.3.5 // indirect
 	github.com/stretchr/testify v1.6.1
-	github.com/team4yf/fpm-go-pkg v0.0.0-20200907232930-67704d580ed7
+	github.com/team4yf/fpm-go-pkg v0.0.0-20200909075814-040cb22d0a7d
 	github.com/team4yf/yf-fpm-server-go v0.2.4
-	golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8 // indirect
-	gopkg.in/ini.v1 v1.60.1 // indirect
+	golang.org/x/sys v0.0.0-20200909081042-eff7692f9009 // indirect
+	gopkg.in/ini.v1 v1.61.0 // indirect
 )
